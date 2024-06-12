@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClassificationBanner": {
+      "commandName": "Project",
+      "commandLineArgs": "-m CONFIDENTIAL -b #0033A0"
+    }
+  }
+}
