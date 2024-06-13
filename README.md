@@ -1,2 +1,2 @@
-# ClassificationBanner
+# WPFClassificationBanner
 ![](preview.jpg)
