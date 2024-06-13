@@ -1,0 +1,14 @@
+<Window x:Class="Banner.LeftWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Banner"
+        d:DesignHeight="600"
+        d:DesignWidth="2" MaxWidth="2"
+        mc:Ignorable="d"
+        x:Name="LWindow"
+        Background="#007A33"
+        Title=""
+        WindowState="Minimized">
+</Window>
