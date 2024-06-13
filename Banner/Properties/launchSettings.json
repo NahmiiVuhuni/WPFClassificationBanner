@@ -1,7 +1,8 @@
 {
   "profiles": {
     "ClassificationBanner": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-c"
     }
   }
 }

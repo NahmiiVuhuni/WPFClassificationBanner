@@ -12,7 +12,8 @@
         Background="#007A33"
         SizeToContent="Height"
         WindowState="Minimized"
-        Loaded="MWindow_Loaded">
+        Loaded="MWindow_Loaded"
+        MouseDown="MWindow_MouseDown">
     <Grid>
         <TextBlock x:Name="LText"
                    Text="" 
