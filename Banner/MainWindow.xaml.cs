@@ -9,15 +9,13 @@ using System.Net;
 
 namespace ClassificationBanner
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        LeftWindow LWindow = new();
-        RightWindow RWindow = new();
-        BottomWindow BWindow = new();
-        Options options = Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs()).Value;
+        private Options options = Parser.Default.ParseArguments<Options>(Environment.GetCommandLineArgs()).Value;
+        private LeftWindow? LWindow;
+        private RightWindow? RWindow;
+        private BottomWindow? BWindow;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -63,21 +61,29 @@ namespace ClassificationBanner
 
             SetStyle();
 
+            // Dock and un-minimize windows
             AppBarFunctions.SetAppBar(this, ABEdge.Top);
             if (!options.TopbarOnly)
             {
                 AppBarFunctions.SetAppBar(LWindow, ABEdge.Left);
                 AppBarFunctions.SetAppBar(RWindow, ABEdge.Right);
                 AppBarFunctions.SetAppBar(BWindow, ABEdge.Bottom);
-                LWindow.WindowState = WindowState.Normal;
-                RWindow.WindowState = WindowState.Normal;
-                BWindow.WindowState = WindowState.Normal;
+                if (LWindow != null) { LWindow.WindowState = WindowState.Normal; }
+                if (RWindow != null) { RWindow.WindowState = WindowState.Normal; }
+                if (BWindow != null) { BWindow.WindowState = WindowState.Normal; }
             }
             MWindow.WindowState = WindowState.Normal;
         }
 
         private void InitBorder()
         {
+            // Initialize borders and prepare to be shown.
+            // At this stage, borders are still minimized and not docked.
+
+            LWindow = new();
+            RWindow = new();
+            BWindow = new();
+
             LWindow.Owner = this;
             RWindow.Owner = this;
             BWindow.Owner = this;
@@ -90,8 +96,11 @@ namespace ClassificationBanner
             RWindow.Background = MWindow.Background;
             BWindow.Background = MWindow.Background;
         }
+
         private void SetStyle()
         {
+            // Assign values from options object, or set default value if neccessary.
+            // Default is the DoD UNCLASSIFIED banner.
             MWindow.Background = new BrushConverter().ConvertFrom(options.BgColor ?? "#007A33") as SolidColorBrush;
             CText.Foreground = new BrushConverter().ConvertFrom(options.FgColor ?? "#000000") as SolidColorBrush;
             LText.Foreground = CText.Foreground;
@@ -100,13 +109,15 @@ namespace ClassificationBanner
             LText.Text = options.LValue ?? "";
             RText.Text = options.RValue ?? "";
 
+            //If the full border is to be drawn, get border color from main window's background.
             if (!options.TopbarOnly)
             {
-                LWindow.Background = MWindow.Background;
-                RWindow.Background = MWindow.Background;
-                BWindow.Background = MWindow.Background;
+                if (LWindow != null) { LWindow.Background = MWindow.Background; }
+                if (RWindow != null) { RWindow.Background = MWindow.Background; }
+                if (BWindow != null) { BWindow.Background = MWindow.Background; }
             }
         }
+
         private void LoadPreset()
         {
             switch (options.Preset)
@@ -155,7 +166,10 @@ namespace ClassificationBanner
         }
         private void GetSysinfo()
         {
-            options.LValue ??= "FNIC";
+            // Example output: DISA | Nahmii | NT 10.0.22631.0 | 192.168.1.101
+            // This is terrible, a string builder would be way better.
+            // TODO: Handle custom names properly.
+            options.LValue ??= "DISA";
             options.LValue += " | ";
             options.LValue += Environment.UserName;
             options.LValue += " | ";
@@ -167,14 +181,18 @@ namespace ClassificationBanner
         }
         private static string GetLocalIPAddress()
         {
+            // This is a hack, however it's the only reliable way to show the correct local IP when using virt/container networks or VPNs.
             using Socket socket = new(AddressFamily.InterNetwork, SocketType.Dgram, 0);
             socket.Connect("8.8.8.8", 65530);
             IPEndPoint? endPoint = socket.LocalEndPoint as IPEndPoint;
-            return endPoint?.Address.ToString() ?? "127.0.0.1";
+            return endPoint?.Address.ToString() ?? "127.0.0.1"; // Default to showing localhost if nothing found. Likely will appear when link down.
         }
         private void MWindow_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-
+            // This handler is always active, but does nothing unless cyclable is set.
+            // Assumption is that the user has not selected a preset, so first call will switch to switch 2 (as switch 1 is default).
+            // If a preset was chosen and it's not a numerical preset, this'll jump out of order on the first click.
+            // Order: 2-5, then 1-5 repeating
             if (options.Cyclable)
             {
                 _ = Int32.TryParse(options.Preset, out int i);
